@@ -16,6 +16,11 @@ Route::get('/health', function () {
     ]);
 });
 
+// Simple test route for debugging
+Route::get('/test', function () {
+    return 'Laravel is working!';
+});
+
 Route::get('/', function () {
     return redirect('/dashboard');
 });
