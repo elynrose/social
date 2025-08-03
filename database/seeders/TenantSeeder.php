@@ -24,37 +24,15 @@ class TenantSeeder extends Seeder
         // Create main tenant
         $mainTenant = Tenant::create([
             'name' => 'Social Media OS',
-            'owner_id' => $adminUser->id,
-            'slug' => 'social-media-os',
-            'settings' => [
-                'timezone' => 'UTC',
-                'date_format' => 'Y-m-d',
-                'time_format' => 'H:i',
-                'currency' => 'USD',
-            ],
-            'stripe_id' => null,
-            'pm_type' => null,
-            'pm_last_four' => null,
-            'trial_ends_at' => now()->addDays(30),
-            'plan_id' => null,
+            'domain' => 'social-media-os.local',
+            'database' => 'social_media_os_main',
         ]);
 
         // Create demo tenant
         $demoTenant = Tenant::create([
             'name' => 'Demo Company',
-            'owner_id' => $adminUser->id,
-            'slug' => 'demo-company',
-            'settings' => [
-                'timezone' => 'America/New_York',
-                'date_format' => 'm/d/Y',
-                'time_format' => 'g:i A',
-                'currency' => 'USD',
-            ],
-            'stripe_id' => null,
-            'pm_type' => null,
-            'pm_last_four' => null,
-            'trial_ends_at' => now()->addDays(14),
-            'plan_id' => null,
+            'domain' => 'demo-company.local',
+            'database' => 'social_media_os_demo',
         ]);
 
         // Assign users to tenants through the pivot table
@@ -68,8 +46,12 @@ class TenantSeeder extends Seeder
             $demoTenant->users()->attach($testUser->id, ['role' => 'admin']);
         }
 
+        // Also attach admin user to both tenants
+        $mainTenant->users()->attach($adminUser->id, ['role' => 'admin']);
+        $demoTenant->users()->attach($adminUser->id, ['role' => 'admin']);
+
         $this->command->info('Tenants seeded successfully!');
-        $this->command->info('Main Tenant: Social Media OS (Owner: ' . $adminUser->name . ')');
-        $this->command->info('Demo Tenant: Demo Company (Owner: ' . $adminUser->name . ')');
+        $this->command->info('Main Tenant: Social Media OS (Domain: social-media-os.local)');
+        $this->command->info('Demo Tenant: Demo Company (Domain: demo-company.local)');
     }
 } 
