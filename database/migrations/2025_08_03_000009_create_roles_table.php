@@ -6,19 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
-            $table->string('name');
-            $table->string('display_name');
-            $table->text('description')->nullable();
-            $table->json('permissions')->nullable();
-            $table->timestamps();
-            
-            $table->unique(['tenant_id', 'name']);
-        });
+        if (!Schema::hasTable('roles')) {
+            Schema::create('roles', function (Blueprint $table) {
+                $table->id();
+                $table->string('name')->unique();
+                $table->string('display_name');
+                $table->text('description')->nullable();
+                $table->json('permissions')->nullable();
+                $table->timestamps();
+            });
+        }
 
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
@@ -38,6 +40,9 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('role_user');
