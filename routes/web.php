@@ -38,6 +38,9 @@ Route::middleware(['auth'])->group(function () {
     // Analytics routes
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/posts', [AnalyticsController::class, 'posts'])->name('analytics.posts');
+    Route::get('/analytics/engagement', [AnalyticsController::class, 'engagement'])->name('analytics.engagement');
+    Route::get('/analytics/overview', [AnalyticsController::class, 'overview'])->name('analytics.overview');
+    Route::get('/analytics/{platform}', [AnalyticsController::class, 'platform'])->name('analytics.platform');
     Route::get('/api/analytics', [AnalyticsController::class, 'api'])->name('analytics.api');
     
     // Billing routes
