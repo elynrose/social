@@ -22,40 +22,28 @@ function ensureDirectory($path) {
     return true;
 }
 
-// Test if we can write to storage
-$testFile = $storagePath . '/framework/cache/test-permissions.txt';
-try {
-    if (ensureDirectory($storagePath . '/framework/cache')) {
-        file_put_contents($testFile, $content);
-        echo "✅ Can write to storage/framework/cache\n";
-        unlink($testFile);
-    }
-} catch (Exception $e) {
-    echo "❌ Cannot write to storage/framework/cache: " . $e->getMessage() . "\n";
-}
+// Test all storage directories
+$testDirs = [
+    $storagePath . '/framework/cache',
+    $storagePath . '/framework/sessions',
+    $storagePath . '/framework/views',
+    $storagePath . '/logs',
+    $bootstrapPath
+];
 
-// Test if we can write to bootstrap/cache
-$testFile = $bootstrapPath . '/test-permissions.txt';
-try {
-    if (ensureDirectory($bootstrapPath)) {
-        file_put_contents($testFile, $content);
-        echo "✅ Can write to bootstrap/cache\n";
-        unlink($testFile);
+foreach ($testDirs as $dir) {
+    $relativePath = str_replace($basePath . '/', '', $dir);
+    $testFile = $dir . '/test-permissions.txt';
+    
+    try {
+        if (ensureDirectory($dir)) {
+            file_put_contents($testFile, $content);
+            echo "✅ Can write to $relativePath\n";
+            unlink($testFile);
+        }
+    } catch (Exception $e) {
+        echo "❌ Cannot write to $relativePath: " . $e->getMessage() . "\n";
     }
-} catch (Exception $e) {
-    echo "❌ Cannot write to bootstrap/cache: " . $e->getMessage() . "\n";
-}
-
-// Test if we can write to logs
-$testFile = $storagePath . '/logs/test-permissions.log';
-try {
-    if (ensureDirectory($storagePath . '/logs')) {
-        file_put_contents($testFile, $content);
-        echo "✅ Can write to storage/logs\n";
-        unlink($testFile);
-    }
-} catch (Exception $e) {
-    echo "❌ Cannot write to storage/logs: " . $e->getMessage() . "\n";
 }
 
 // Check directory permissions

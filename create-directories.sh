@@ -17,11 +17,15 @@ echo "Setting permissions..."
 chmod -R 777 storage
 chmod -R 777 bootstrap/cache
 
-# Verify directories exist
+# Verify directories exist and are writable
 echo "Verifying directories..."
 for dir in storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache; do
     if [ -d "$dir" ]; then
-        echo "✅ $dir exists"
+        if [ -w "$dir" ]; then
+            echo "✅ $dir exists and is writable"
+        else
+            echo "⚠️ $dir exists but not writable"
+        fi
     else
         echo "❌ $dir missing"
     fi
