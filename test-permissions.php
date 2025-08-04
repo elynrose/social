@@ -2,10 +2,15 @@
 
 echo "🔍 Testing Laravel Cloud Permissions\n";
 
-// Test if we can write to storage
-$testFile = storage_path('framework/cache/test-permissions.txt');
+// Define paths directly
+$basePath = __DIR__;
+$storagePath = $basePath . '/storage';
+$bootstrapPath = $basePath . '/bootstrap/cache';
+
 $content = 'Test write at ' . date('Y-m-d H:i:s');
 
+// Test if we can write to storage
+$testFile = $storagePath . '/framework/cache/test-permissions.txt';
 try {
     file_put_contents($testFile, $content);
     echo "✅ Can write to storage/framework/cache\n";
@@ -15,7 +20,7 @@ try {
 }
 
 // Test if we can write to bootstrap/cache
-$testFile = base_path('bootstrap/cache/test-permissions.txt');
+$testFile = $bootstrapPath . '/test-permissions.txt';
 try {
     file_put_contents($testFile, $content);
     echo "✅ Can write to bootstrap/cache\n";
@@ -25,7 +30,7 @@ try {
 }
 
 // Test if we can write to logs
-$testFile = storage_path('logs/test-permissions.log');
+$testFile = $storagePath . '/logs/test-permissions.log';
 try {
     file_put_contents($testFile, $content);
     echo "✅ Can write to storage/logs\n";
@@ -37,11 +42,11 @@ try {
 // Check directory permissions
 echo "\n📁 Directory Permissions:\n";
 $dirs = [
-    storage_path('framework/cache'),
-    storage_path('framework/sessions'),
-    storage_path('framework/views'),
-    storage_path('logs'),
-    base_path('bootstrap/cache')
+    $storagePath . '/framework/cache',
+    $storagePath . '/framework/sessions',
+    $storagePath . '/framework/views',
+    $storagePath . '/logs',
+    $bootstrapPath
 ];
 
 foreach ($dirs as $dir) {
