@@ -28,7 +28,12 @@
                             <strong>Slug:</strong> {{ $tenant->slug }}
                         </div>
                         <div class="mb-3">
-                            <strong>Owner:</strong> {{ $tenant->owner->name }}
+                            <strong>Owner:</strong> 
+                            @if($tenant->owner)
+                                {{ $tenant->owner->name }}
+                            @else
+                                <span class="text-muted">No owner</span>
+                            @endif
                         </div>
                         <div class="mb-3">
                             <strong>Plan:</strong> 
@@ -51,7 +56,8 @@
                         <div class="mb-3">
                             <strong>Your Role:</strong>
                             @php
-                                $userRole = $tenant->users()->where('user_id', auth()->id())->first()->pivot->role ?? 'member';
+                                $userTenant = $tenant->users()->where('user_id', auth()->id())->first();
+                                $userRole = $userTenant ? $userTenant->pivot->role : 'member';
                             @endphp
                             <span class="badge bg-info">{{ ucfirst($userRole) }}</span>
                         </div>
