@@ -55,18 +55,23 @@ class SetCurrentTenant
             if ($tenant) {
                 app()->instance('currentTenant', $tenant);
             } else {
-                // If no tenant is found, create a default tenant or handle gracefully
-                // For now, we'll create a default tenant for the user
-                $defaultTenant = Tenant::create([
-                    'name' => $user->name . "'s Workspace",
-                    'owner_id' => $user->id,
-                    'slug' => strtolower(str_replace(' ', '-', $user->name)) . '-' . time(),
-                ]);
-                
-                // Attach the user to this tenant
-                $user->tenants()->attach($defaultTenant->id, ['role' => 'owner']);
-                
-                app()->instance('currentTenant', $defaultTenant);
+                // If no tenant is found, try to create a default tenant
+                try {
+                    $defaultTenant = Tenant::create([
+                        'name' => $user->name . "'s Workspace",
+                        'owner_id' => $user->id,
+                        'slug' => strtolower(str_replace(' ', '-', $user->name)) . '-' . time(),
+                    ]);
+                    
+                    // Attach the user to this tenant
+                    $user->tenants()->attach($defaultTenant->id, ['role' => 'owner']);
+                    
+                    app()->instance('currentTenant', $defaultTenant);
+                } catch (\Exception $e) {
+                    // Log the error and continue without tenant binding
+                    \Log::error('Failed to create default tenant: ' . $e->getMessage());
+                    // Don't bind a tenant if creation fails
+                }
             }
         } catch (\Exception $e) {
             // Log the error and continue without tenant binding
