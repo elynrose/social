@@ -9,12 +9,27 @@ $bootstrapPath = $basePath . '/bootstrap/cache';
 
 $content = 'Test write at ' . date('Y-m-d H:i:s');
 
+// Function to ensure directory exists and is writable
+function ensureDirectory($path) {
+    if (!is_dir($path)) {
+        if (mkdir($path, 0777, true)) {
+            echo "📁 Created directory: $path\n";
+        } else {
+            echo "❌ Failed to create directory: $path\n";
+            return false;
+        }
+    }
+    return true;
+}
+
 // Test if we can write to storage
 $testFile = $storagePath . '/framework/cache/test-permissions.txt';
 try {
-    file_put_contents($testFile, $content);
-    echo "✅ Can write to storage/framework/cache\n";
-    unlink($testFile);
+    if (ensureDirectory($storagePath . '/framework/cache')) {
+        file_put_contents($testFile, $content);
+        echo "✅ Can write to storage/framework/cache\n";
+        unlink($testFile);
+    }
 } catch (Exception $e) {
     echo "❌ Cannot write to storage/framework/cache: " . $e->getMessage() . "\n";
 }
@@ -22,9 +37,11 @@ try {
 // Test if we can write to bootstrap/cache
 $testFile = $bootstrapPath . '/test-permissions.txt';
 try {
-    file_put_contents($testFile, $content);
-    echo "✅ Can write to bootstrap/cache\n";
-    unlink($testFile);
+    if (ensureDirectory($bootstrapPath)) {
+        file_put_contents($testFile, $content);
+        echo "✅ Can write to bootstrap/cache\n";
+        unlink($testFile);
+    }
 } catch (Exception $e) {
     echo "❌ Cannot write to bootstrap/cache: " . $e->getMessage() . "\n";
 }
@@ -32,9 +49,11 @@ try {
 // Test if we can write to logs
 $testFile = $storagePath . '/logs/test-permissions.log';
 try {
-    file_put_contents($testFile, $content);
-    echo "✅ Can write to storage/logs\n";
-    unlink($testFile);
+    if (ensureDirectory($storagePath . '/logs')) {
+        file_put_contents($testFile, $content);
+        echo "✅ Can write to storage/logs\n";
+        unlink($testFile);
+    }
 } catch (Exception $e) {
     echo "❌ Cannot write to storage/logs: " . $e->getMessage() . "\n";
 }

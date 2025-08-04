@@ -66,7 +66,11 @@ class TestPermissions extends Command
 
         try {
             if (!is_dir($fullPath)) {
-                mkdir($fullPath, 0777, true);
+                $this->info("📁 Creating directory: $relativePath");
+                if (!mkdir($fullPath, 0777, true)) {
+                    $this->error("❌ Failed to create directory: $relativePath");
+                    return;
+                }
             }
 
             file_put_contents($testFile, $content);
