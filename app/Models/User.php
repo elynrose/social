@@ -68,9 +68,7 @@ class User extends Authenticatable
      */
     public function hasPermission($permission)
     {
-        return $this->roles()->whereHas('permissions', function ($query) use ($permission) {
-            $query->where('name', $permission);
-        })->exists();
+        return $this->roles()->whereJsonContains('permissions', $permission)->exists();
     }
 
     /**
@@ -78,8 +76,10 @@ class User extends Authenticatable
      */
     public function hasAnyPermission($permissions)
     {
-        return $this->roles()->whereHas('permissions', function ($query) use ($permissions) {
-            $query->whereIn('name', $permissions);
+        return $this->roles()->where(function ($query) use ($permissions) {
+            foreach ($permissions as $permission) {
+                $query->orWhereJsonContains('permissions', $permission);
+            }
         })->exists();
     }
 
