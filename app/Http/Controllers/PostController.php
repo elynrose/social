@@ -71,8 +71,7 @@ class PostController extends Controller
         $request->validate([
             'content' => 'required|string|max:5000',
             'media' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,mov|max:10240', // 10MB max
-            'platforms' => 'required|array|min:1',
-            'platforms.*' => 'string|in:facebook,twitter,linkedin,instagram,youtube',
+            'social_account_id' => 'required|exists:social_accounts,id',
             'campaign_id' => 'nullable|exists:campaigns,id',
             'scheduled_at' => 'nullable|date|after:now',
             'requires_approval' => 'boolean',
@@ -128,8 +127,8 @@ class PostController extends Controller
             }
 
             // Publish immediately if requested
-            if ($request->boolean('publish_now') && !$request->scheduled_at) {
-                PublishPostJob::dispatch($post->id);
+            if ($request->input('publish_type') === 'now' && !$request->scheduled_at) {
+                PublishPostJob::dispatch($post);
             }
 
             return redirect()->route('posts.index')
@@ -280,7 +279,7 @@ class PostController extends Controller
         $this->authorize('update', $post);
 
         try {
-            PublishPostJob::dispatch($post->id);
+            PublishPostJob::dispatch($post);
 
             return response()->json([
                 'success' => true,

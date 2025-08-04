@@ -182,10 +182,19 @@ class ApiConfigurationController extends Controller
             // Test the configuration by attempting to create a Socialite driver
             $driver = \Laravel\Socialite\Facades\Socialite::driver($apiConfiguration->platform);
             
-            // Set the configuration
-            $driver->setClientId($apiConfiguration->client_id);
-            $driver->setClientSecret($apiConfiguration->client_secret);
-            $driver->setRedirectUrl($apiConfiguration->redirect_uri);
+            // Set the configuration using the correct method
+            config([
+                'services.' . $apiConfiguration->platform . '.client_id' => $apiConfiguration->client_id,
+                'services.' . $apiConfiguration->platform . '.client_secret' => $apiConfiguration->client_secret,
+                'services.' . $apiConfiguration->platform . '.redirect' => $apiConfiguration->redirect_uri ?: config('services.' . $apiConfiguration->platform . '.redirect')
+            ]);
+
+            // For Facebook, we can test if the client ID format is valid
+            if ($apiConfiguration->platform === 'facebook') {
+                if (!preg_match('/^\d+$/', $apiConfiguration->client_id)) {
+                    throw new \Exception('Facebook Client ID should be numeric');
+                }
+            }
 
             return response()->json([
                 'success' => true,

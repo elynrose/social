@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('scheduled_posts')) {
+            return; // Table doesn't exist, skip this migration
+        }
+
         if (!Schema::hasColumn('scheduled_posts', 'status')) {
             Schema::table('scheduled_posts', function (Blueprint $table) {
                 $table->string('status')->default('scheduled')->after('time_zone');
@@ -23,6 +27,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('scheduled_posts')) {
+            return; // Table doesn't exist, skip this migration
+        }
+
         if (Schema::hasColumn('scheduled_posts', 'status')) {
             Schema::table('scheduled_posts', function (Blueprint $table) {
                 $table->dropColumn('status');

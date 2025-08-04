@@ -10,14 +10,20 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // Add an external_id column to the posts table so we can
-        // persist the remote identifier returned by each social
-        // platform when a post is published. This identifier is
-        // required to query analytics and mentions via platform
-        // APIs.
-        Schema::table('posts', function (Blueprint $table) {
-            $table->string('external_id')->nullable()->after('id');
-        });
+        if (!Schema::hasTable('posts')) {
+            return; // Table doesn't exist, skip this migration
+        }
+
+        if (!Schema::hasColumn('posts', 'external_id')) {
+            // Add an external_id column to the posts table so we can
+            // persist the remote identifier returned by each social
+            // platform when a post is published. This identifier is
+            // required to query analytics and mentions via platform
+            // APIs.
+            Schema::table('posts', function (Blueprint $table) {
+                $table->string('external_id')->nullable()->after('id');
+            });
+        }
     }
 
     /**
@@ -25,8 +31,14 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('posts', function (Blueprint $table) {
-            $table->dropColumn('external_id');
-        });
+        if (!Schema::hasTable('posts')) {
+            return; // Table doesn't exist, skip this migration
+        }
+
+        if (Schema::hasColumn('posts', 'external_id')) {
+            Schema::table('posts', function (Blueprint $table) {
+                $table->dropColumn('external_id');
+            });
+        }
     }
 };

@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Cashier\Billable;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    use Billable;
 
     protected $fillable = [
         'name',
@@ -24,6 +26,9 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'consent_at' => 'datetime',
+        'consent_preferences' => 'array',
+        'notification_preferences' => 'array',
     ];
 
     /**
@@ -43,12 +48,29 @@ class User extends Authenticatable
     }
 
     /**
+     * Roles assigned to this user.
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * Notifications for this user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    /**
      * Check if user has a specific permission.
      */
     public function hasPermission($permission)
     {
-        // Simplified permission check
-        return true;
+        return $this->roles()->whereHas('permissions', function ($query) use ($permission) {
+            $query->where('name', $permission);
+        })->exists();
     }
 
     /**
@@ -56,7 +78,20 @@ class User extends Authenticatable
      */
     public function hasAnyPermission($permissions)
     {
-        // Simplified permission check
-        return true;
+        return $this->roles()->whereHas('permissions', function ($query) use ($permissions) {
+            $query->whereIn('name', $permissions);
+        })->exists();
+    }
+
+    /**
+     * Get user's role in the current tenant.
+     */
+    public function getCurrentRole()
+    {
+        if (!app()->bound('currentTenant')) {
+            return null;
+        }
+        
+        return $this->roles()->where('tenant_id', app('currentTenant')->id)->first();
     }
 }

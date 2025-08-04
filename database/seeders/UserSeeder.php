@@ -19,6 +19,10 @@ class UserSeeder extends Seeder
             'email' => 'admin@socialmediaos.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
+            'consent_at' => now(),
+            'consent_preferences' => ['marketing' => true, 'analytics' => true],
+            'timezone' => 'UTC',
+            'notification_preferences' => ['email' => true, 'in_app' => true],
         ]);
 
         // Create regular user
@@ -27,6 +31,10 @@ class UserSeeder extends Seeder
             'email' => 'john@socialmediaos.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
+            'consent_at' => now(),
+            'consent_preferences' => ['marketing' => true, 'analytics' => true],
+            'timezone' => 'America/New_York',
+            'notification_preferences' => ['email' => true, 'in_app' => true],
         ]);
 
         // Create test user
@@ -35,6 +43,10 @@ class UserSeeder extends Seeder
             'email' => 'test@socialmediaos.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
+            'consent_at' => now(),
+            'consent_preferences' => ['marketing' => false, 'analytics' => true],
+            'timezone' => 'Europe/London',
+            'notification_preferences' => ['email' => false, 'in_app' => true],
         ]);
 
         $this->command->info('Users seeded successfully!');

@@ -4,24 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        if (!Schema::hasTable('comments')) {
-            Schema::create('comments', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('post_id')->constrained('posts')->cascadeOnDelete();
-                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-                $table->text('content');
-                $table->string('platform');
-                $table->string('platform_comment_id')->nullable();
-                $table->timestamps();
-            });
-        }
+        Schema::create('comments', function (Blueprint $table) {
+            $table->id();
+            // Tenant relation for multi‑tenant scoping
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('post_id')->constrained('posts')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            // parent_id points back to the comment being replied to; null for top‑level
+            $table->foreignId('parent_id')->nullable()->constrained('comments')->cascadeOnDelete();
+            $table->text('content');
+            $table->timestamps();
+        });
     }
 
     /**

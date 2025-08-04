@@ -1,50 +1,68 @@
 #!/bin/bash
 
-# Laravel Cloud Deployment Script
-# This script ensures all necessary directories exist and have proper permissions
+# Production Deployment Script for Social Media OS
+# Run this script on your production server
 
-echo "🚀 Starting Laravel Cloud deployment setup..."
+set -e
 
-# Create necessary directories
-echo "📁 Creating required directories..."
-mkdir -p bootstrap/cache
-mkdir -p storage/framework/cache
-mkdir -p storage/framework/sessions
-mkdir -p storage/framework/views
-mkdir -p storage/logs
-mkdir -p storage/app/public
+echo "🚀 Starting production deployment..."
 
-# Set proper permissions
-echo "🔐 Setting directory permissions..."
-chmod -R 755 bootstrap/cache
-chmod -R 755 storage
-chmod -R 755 storage/framework
-chmod -R 755 storage/logs
-chmod -R 755 storage/app
+# 1. Pull latest changes
+echo "📥 Pulling latest changes..."
+git pull origin main
 
-# Make sure the web server can write to these directories
-chmod 775 bootstrap/cache
-chmod 775 storage/framework/cache
-chmod 775 storage/framework/sessions
-chmod 775 storage/framework/views
-chmod 775 storage/logs
+# 2. Install/update dependencies
+echo "📦 Installing dependencies..."
+composer install --no-dev --optimize-autoloader
 
-# Clear any existing cache files
-echo "🧹 Clearing existing cache files..."
-find storage/framework/cache -type f -delete 2>/dev/null || true
-find storage/framework/views -type f -delete 2>/dev/null || true
-find bootstrap/cache -type f -delete 2>/dev/null || true
+# 3. Set production environment
+echo "⚙️ Setting production environment..."
+export APP_ENV=production
+export APP_DEBUG=false
 
-# Create .gitkeep files to ensure directories are tracked
-echo "📝 Creating .gitkeep files..."
-touch bootstrap/cache/.gitkeep
-touch storage/framework/cache/.gitkeep
-touch storage/framework/sessions/.gitkeep
-touch storage/framework/views/.gitkeep
-touch storage/logs/.gitkeep
+# 4. Run database migrations
+echo "🗄️ Running database migrations..."
+php artisan migrate --force
 
-echo "✅ Laravel Cloud deployment setup complete!"
-echo "📋 Next steps:"
-echo "   1. Commit these changes: git add . && git commit -m 'Add deployment directories'"
-echo "   2. Push to your repository: git push origin main"
-echo "   3. Deploy to Laravel Cloud" 
+# 5. Clear and cache configurations
+echo "⚡ Optimizing for production..."
+php artisan config:clear
+php artisan config:cache
+php artisan route:clear
+php artisan route:cache
+php artisan view:clear
+php artisan view:cache
+
+# 6. Create storage link if not exists
+echo "📁 Setting up storage..."
+php artisan storage:link
+
+# 7. Set proper permissions
+echo "🔐 Setting permissions..."
+chmod -R 755 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+
+# 8. Restart queue workers
+echo "🔄 Restarting queue workers..."
+php artisan queue:restart
+
+# 9. Create database backup
+echo "💾 Creating database backup..."
+php artisan backup:database
+
+# 10. Run tests (optional - remove in production if not needed)
+echo "🧪 Running tests..."
+php artisan test --stop-on-failure
+
+# 11. Clear application cache
+echo "🧹 Clearing caches..."
+php artisan cache:clear
+php artisan optimize:clear
+
+# 12. Optimize for production
+echo "🚀 Final optimization..."
+php artisan optimize
+
+echo "✅ Deployment completed successfully!"
+echo "🌐 Your application is now live at: $(php artisan config:show app.url)"
+echo "📊 Monitor your application with: php artisan horizon" 

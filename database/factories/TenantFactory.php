@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Tenant>
@@ -20,9 +21,9 @@ class TenantFactory extends Factory
         $name = fake()->company();
         
         return [
+            'owner_id' => User::factory(),
             'name' => $name,
             'slug' => Str::slug($name),
-            'domain' => fake()->domainName(),
             'settings' => [
                 'timezone' => 'UTC',
                 'language' => 'en',

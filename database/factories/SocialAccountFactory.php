@@ -21,11 +21,9 @@ class SocialAccountFactory extends Factory
             'platform' => fake()->randomElement(['facebook', 'twitter', 'linkedin', 'instagram', 'youtube']),
             'account_id' => fake()->unique()->numerify('##########'),
             'username' => fake()->userName(),
-            'display_name' => fake()->name(),
             'access_token' => fake()->sha1(),
             'refresh_token' => fake()->sha1(),
-            'token_expires_at' => fake()->dateTimeBetween('now', '+1 year'),
-            'is_active' => true
+            'token_expires_at' => fake()->dateTimeBetween('now', '+1 year')
         ];
     }
 } 

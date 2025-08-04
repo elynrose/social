@@ -77,33 +77,48 @@
                             </div>
 
                             <div class="col-md-4">
-                                <!-- Platform Selection -->
+                                <!-- Social Account Selection -->
                                 <div class="mb-4">
-                                    <label class="form-label">Platforms</label>
+                                    <label for="social_account_id" class="form-label">Social Account</label>
+                                    <select class="form-select" name="social_account_id" id="social_account_id" required>
+                                        <option value="">Select Social Account</option>
+                                        @foreach($socialAccounts ?? [] as $account)
+                                            <option value="{{ $account->id }}" data-platform="{{ $account->platform }}">
+                                                <i class="fab fa-{{ $account->platform }}"></i> {{ $account->username }} ({{ ucfirst($account->platform) }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="form-text">Select the social media account to post to</div>
+                                </div>
+
+                                <!-- Platform Selection (for future multi-platform posting) -->
+                                <div class="mb-4">
+                                    <label class="form-label">Additional Platforms</label>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="platforms[]" value="facebook" id="facebook">
+                                        <input class="form-check-input" type="checkbox" name="platforms[]" value="facebook" id="facebook" disabled>
                                         <label class="form-check-label" for="facebook">
                                             <i class="fab fa-facebook text-primary"></i> Facebook
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="platforms[]" value="twitter" id="twitter">
+                                        <input class="form-check-input" type="checkbox" name="platforms[]" value="twitter" id="twitter" disabled>
                                         <label class="form-check-label" for="twitter">
                                             <i class="fab fa-twitter text-info"></i> Twitter
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="platforms[]" value="linkedin" id="linkedin">
+                                        <input class="form-check-input" type="checkbox" name="platforms[]" value="linkedin" id="linkedin" disabled>
                                         <label class="form-check-label" for="linkedin">
                                             <i class="fab fa-linkedin text-primary"></i> LinkedIn
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="platforms[]" value="instagram" id="instagram">
+                                        <input class="form-check-input" type="checkbox" name="platforms[]" value="instagram" id="instagram" disabled>
                                         <label class="form-check-label" for="instagram">
                                             <i class="fab fa-instagram text-danger"></i> Instagram
                                         </label>
                                     </div>
+                                    <div class="form-text text-muted">Multi-platform posting coming soon</div>
                                 </div>
 
                                 <!-- Scheduling -->

@@ -49,19 +49,15 @@ class OAuthController extends Controller
 
             $tenant = app('currentTenant');
             
-            // Create or update the social account
-            $account = SocialAccount::updateOrCreate([
-                'tenant_id' => $tenant->id,
-                'platform' => $provider,
-                'account_id' => $socialUser->getId(),
-            ], [
-                'username' => $socialUser->getNickname() ?: $socialUser->getName() ?: '',
-                'access_token' => encrypt($socialUser->token),
-                'refresh_token' => $socialUser->refreshToken ? encrypt($socialUser->refreshToken) : null,
-                'token_expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
-            ]);
+            if ($provider === 'facebook') {
+                // For Facebook, fetch the user's pages
+                $this->handleFacebookCallback($socialUser, $tenant);
+            } else {
+                // For other providers, create a single account
+                $this->handleOtherProviderCallback($socialUser, $tenant, $provider);
+            }
 
-            return redirect('/dashboard')->with('status', ucfirst($provider) . ' account connected successfully.');
+            return redirect('/dashboard')->with('status', ucfirst($provider) . ' accounts connected successfully.');
 
         } catch (\Exception $e) {
             Log::error('OAuth callback error', [
@@ -71,6 +67,63 @@ class OAuthController extends Controller
             
             return redirect('/dashboard')->with('error', 'Failed to connect ' . ucfirst($provider) . ' account.');
         }
+    }
+
+    protected function handleFacebookCallback($socialUser, $tenant)
+    {
+        $accessToken = $socialUser->token;
+        
+        // Fetch user's Facebook pages
+        $response = Http::get('https://graph.facebook.com/v18.0/me/accounts', [
+            'access_token' => $accessToken,
+        ]);
+
+        if ($response->successful()) {
+            $pages = $response->json()['data'] ?? [];
+            
+            foreach ($pages as $page) {
+                // Create or update social account for each page
+                SocialAccount::updateOrCreate([
+                    'tenant_id' => $tenant->id,
+                    'platform' => 'facebook',
+                    'account_id' => $page['id'],
+                ], [
+                    'username' => $page['name'],
+                    'access_token' => encrypt($page['access_token']),
+                    'is_active' => true,
+                    'token_expires_at' => $page['expires_at'] ? now()->addSeconds($page['expires_at']) : null,
+                ]);
+            }
+
+            Log::info('Facebook pages connected', [
+                'tenant_id' => $tenant->id,
+                'pages_count' => count($pages),
+                'pages' => array_column($pages, 'name')
+            ]);
+        } else {
+            Log::error('Failed to fetch Facebook pages', [
+                'response' => $response->json(),
+                'status' => $response->status()
+            ]);
+            
+            throw new \Exception('Failed to fetch Facebook pages');
+        }
+    }
+
+    protected function handleOtherProviderCallback($socialUser, $tenant, $provider)
+    {
+        // Create or update the social account
+        SocialAccount::updateOrCreate([
+            'tenant_id' => $tenant->id,
+            'platform' => $provider,
+            'account_id' => $socialUser->getId(),
+        ], [
+            'username' => $socialUser->getNickname() ?: $socialUser->getName() ?: '',
+            'access_token' => encrypt($socialUser->token),
+            'refresh_token' => $socialUser->refreshToken ? encrypt($socialUser->refreshToken) : null,
+            'token_expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
+            'is_active' => true,
+        ]);
     }
 
     public function refreshToken(SocialAccount $account)

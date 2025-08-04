@@ -11,21 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('api_configurations')) {
-            Schema::create('api_configurations', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
-                $table->string('platform');
-                $table->string('app_id')->nullable();
-                $table->string('app_secret')->nullable();
-                $table->text('access_token')->nullable();
-                $table->text('refresh_token')->nullable();
-                $table->timestamp('token_expires_at')->nullable();
-                $table->json('settings')->nullable();
-                $table->boolean('is_active')->default(false);
-                $table->timestamps();
-            });
-        }
+        Schema::create('api_configurations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->string('platform');
+            $table->string('client_id')->nullable();
+            $table->text('client_secret')->nullable(); // Encrypted
+            $table->string('redirect_uri')->nullable();
+            $table->json('scopes')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->json('settings')->nullable(); // Additional platform-specific settings
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->unique(['tenant_id', 'platform']);
+            $table->index(['tenant_id', 'platform', 'is_active']);
+        });
     }
 
     /**

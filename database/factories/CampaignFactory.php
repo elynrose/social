@@ -19,13 +19,9 @@ class CampaignFactory extends Factory
         return [
             'tenant_id' => null,
             'name' => fake()->words(3, true),
-            'description' => fake()->paragraph(),
             'start_date' => fake()->dateTimeBetween('now', '+1 month'),
             'end_date' => fake()->dateTimeBetween('+1 month', '+3 months'),
-            'status' => fake()->randomElement(['draft', 'active', 'paused', 'completed']),
-            'budget' => fake()->numberBetween(100, 10000),
-            'target_audience' => fake()->words(5, true),
-            'goals' => fake()->paragraph()
+            'goal' => fake()->sentence()
         ];
     }
 } 
