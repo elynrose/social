@@ -49,7 +49,10 @@ class PostController extends Controller
             $query->where('content', 'like', '%' . $request->search . '%');
         }
 
-        $posts = $query->orderBy('created_at', 'desc')->paginate(15);
+        // Get pagination size (default 15, max 50)
+        $perPage = min($request->get('per_page', 15), 50);
+
+        $posts = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         if ($request->wantsJson()) {
             return response()->json($posts);

@@ -35,9 +35,17 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+                    <select name="per_page" class="form-select">
+                        <option value="10" {{ request('per_page', 15) == 10 ? 'selected' : '' }}>10 per page</option>
+                        <option value="15" {{ request('per_page', 15) == 15 ? 'selected' : '' }}>15 per page</option>
+                        <option value="25" {{ request('per_page', 15) == 25 ? 'selected' : '' }}>25 per page</option>
+                        <option value="50" {{ request('per_page', 15) == 50 ? 'selected' : '' }}>50 per page</option>
+                    </select>
                 </div>
                 <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+                </div>
+                <div class="col-md-1">
                     <a href="{{ route('posts.index') }}" class="btn btn-outline-secondary w-100">Clear</a>
                 </div>
             </form>
@@ -145,8 +153,13 @@
     </div>
 
     @if($posts->hasPages())
-    <div class="d-flex justify-content-center mt-4">
-        {{ $posts->links() }}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+            Showing {{ $posts->firstItem() ?? 0 }} to {{ $posts->lastItem() ?? 0 }} of {{ $posts->total() }} posts
+        </div>
+        <div>
+            {{ $posts->appends(request()->query())->links() }}
+        </div>
     </div>
     @endif
 </div>
