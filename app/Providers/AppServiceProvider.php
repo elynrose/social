@@ -30,7 +30,6 @@ class AppServiceProvider extends ServiceProvider
         // Production optimizations
         if (app()->environment('production')) {
             \URL::forceScheme('https');
-            app('currentTenant', null); // Will be set by middleware
         }
     }
 } 
